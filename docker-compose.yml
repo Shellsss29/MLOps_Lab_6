@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  trainer:
+    build: ./training
+    volumes:
+      - ./model:/model
+    container_name: trainer
+    command: ["python", "train.py"]
+    restart: "no"
+
+  api:
+    build: ./serving
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./model:/model
+    depends_on:
+      trainer:
+        condition: service_completed_successfully
+    container_name: serving-api
+    entrypoint: ["sh", "wait-for-model.sh"]
